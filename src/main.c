@@ -1,9 +1,6 @@
-#include <iostream>
+#include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <chrono>
-#include <thread>
-#include <vector>
 
 void start_child(char* argv[])
 {
@@ -11,7 +8,8 @@ void start_child(char* argv[])
 
     if(pid == -1)
     {
-        std::cerr << "fork failed, returning" << std::endl;
+        printf("fork failed \n");
+
         return;
     }
     else if(pid == 0) // child code
@@ -23,7 +21,7 @@ void start_child(char* argv[])
     }
     else // parent code 
     {
-        std::cout << "Started program with pid : " << pid << std::endl;
+        printf("started program with pid : %d", pid);
 
         int status;
         if(waitpid(pid, &status , 0) == -1)

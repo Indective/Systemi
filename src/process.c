@@ -1,4 +1,5 @@
 #include "process.h"
+#include <signal.h>
 
 pid_t process_start(process *p)
 {
@@ -25,39 +26,52 @@ pid_t process_start(process *p)
     return pid;
 }
 
-void process_wait(process *p)
+process_result process_wait(process *p)
 {
     int status;
+    process_result result;
 
     if(waitpid(p->pid, &status , 0) == -1)
     {
         perror("waitpid");
-        return;
     }
 
     if (WIFEXITED(status)) 
     {
         int exit_status = WEXITSTATUS(status);
-        printf("Child exited normally with status: %d\n", exit_status);
+        printf("\nChild exited normally with status: %d\n", exit_status);
         p->exit_code = exit_status;
+        result.exit_status = exit_status;
     }
     
-    else if (WIFSIGNALED(status)) 
+    else 
     {
-        int term_signal = WTERMSIG(status);
-        printf("Child was killed by signal: %d\n", term_signal);
-        
-        /*if (WCOREDUMP(status)) 
+        if (WIFSIGNALED(status)) 
         {
-            printf("Child produced a core dump.\n");
-            p->core_dumped = true;
+            int term_signal = WTERMSIG(status);
+            printf("Child was killed by signal: %d\n", term_signal);
+            result.term_signal = term_signal;
+            result.process_signaled = true;
+
+            /*if (WCOREDUMP(status)) 
+            {
+                printf("Child produced a core dump.\n");
+                p->core_dumped = true;
+            }
+            else
+            {
+                p->core_dumped = false;
+            }
+            */
         }
         else
         {
-            p->core_dumped = false;
+            result.term_signal = true;
+            result.term_signal = -1;
         }
-        */
     }
+
+    return result;
 }
 
 int process_stop(process *p)

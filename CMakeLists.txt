@@ -23,3 +23,4 @@ target_compile_options(systemi
         -Wextra
         -Wpedantic
 )
+target_compile_definitions(systemi PRIVATE _POSIX_C_SOURCE=200809L)

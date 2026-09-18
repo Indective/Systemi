@@ -5,4 +5,4 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void update(supervisor *sup);
+void update(supervisor *sup, process *p);

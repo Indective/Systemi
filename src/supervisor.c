@@ -1,3 +1,4 @@
+#include "signals.h"
 #include "types.h"
 #include "supervisor.h"
 
@@ -28,3 +29,9 @@ void update(supervisor *sup, process *p)
     }
     
 }
+
+void init(void)
+{
+    install_sigterm();
+}
+

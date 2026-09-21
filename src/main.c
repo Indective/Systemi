@@ -1,3 +1,4 @@
+#include "signals.h"
 #include "process.h"
 #include "types.h"
 #include "supervisor.h"
@@ -6,8 +7,13 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
+// build a sigterm handler
+
 int main(int argc, char* argv[])
 {
+    // init
+    init();
+
     printf("argc  : %d", argc); // satisfy compiler error
 
     process p;
@@ -20,12 +26,11 @@ int main(int argc, char* argv[])
 
     while(!sup.should_stop)
     {
-        process_result result;
-
         p.pid = process_start(&p);
-        //process_stop(&p);
-        result = process_wait(&p);
+        process_stop(&p);
+        process_wait(&p);
 
+        break;
         update(&sup, &p);
     }
     

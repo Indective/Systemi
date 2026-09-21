@@ -6,3 +6,6 @@
 #include <unistd.h>
 
 void update(supervisor *sup, process *p);
+
+void init(void);
+

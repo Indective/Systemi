@@ -1,5 +1,8 @@
 #include "process.h"
+#include "signals.h"
+
 #include <signal.h>
+#include <errno.h>
 
 pid_t process_start(process *p)
 {
@@ -26,15 +29,9 @@ pid_t process_start(process *p)
     return pid;
 }
 
-process_result process_wait(process *p)
+process_result supervisor_handle_status(int status, process *p)
 {
-    int status;
     process_result result;
-
-    if(waitpid(p->pid, &status , 0) == -1)
-    {
-        perror("waitpid");
-    }
 
     if (WIFEXITED(status)) 
     {
@@ -74,7 +71,29 @@ process_result process_wait(process *p)
     return result;
 }
 
+process_result process_wait(process *p)
+{
+    int status;
+
+    if(waitpid(p->pid, &status , 0) == -1)
+    {
+        if (errno == EINTR) 
+        {
+            sigterm = 0;
+            printf("got sigterm !\n");
+        } 
+        else 
+        {
+            perror("waitpid");
+        }
+    }
+    
+    return supervisor_handle_status(status, p);
+}
+
 int process_stop(process *p)
 {
     return kill(p->pid, SIGTERM);
 }
+
+

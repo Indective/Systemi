@@ -14,10 +14,11 @@ int main(int argc, char* argv[])
     // init
     init();
 
-    printf("argc  : %d", argc); // satisfy compiler error
+    printf("argc  : %d\n", argc); // satisfy compiler error
 
     process p;
     supervisor sup;
+    process_result res;
 
     p.argv = argv;
     p.restart = RES_NEVER;
@@ -27,10 +28,10 @@ int main(int argc, char* argv[])
     while(!sup.should_stop)
     {
         p.pid = process_start(&p);
-        process_stop(&p);
-        process_wait(&p);
+        res = process_wait(&p);
+        
+        //process_stop(&p);
 
-        break;
         update(&sup, &p);
     }
     

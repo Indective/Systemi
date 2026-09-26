@@ -6,6 +6,8 @@
 
 pid_t process_start(process *p)
 {
+    fflush(stdout);
+
     pid_t pid = fork();
 
     if(pid == -1)
@@ -16,6 +18,8 @@ pid_t process_start(process *p)
     }
     else if(pid == 0) // child code
     {
+        restore_signal_handling();
+        
         execvp(p->argv[1], &p->argv[1]);
 
         perror("execvp");
@@ -23,7 +27,7 @@ pid_t process_start(process *p)
     }
     else // parent code 
     {
-        printf("started program with pid : %d", pid);
+        printf("started program with pid : %d\n", pid);
     }
 
     return pid;
@@ -93,7 +97,6 @@ process_result process_wait(process *p)
 
 int process_stop(process *p)
 {
+    printf("killing process\n");
     return kill(p->pid, SIGTERM);
 }
-
-

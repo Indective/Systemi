@@ -2,7 +2,7 @@
 
 #include <signal.h>
 
-volatile sig_atomic_t sigterm = 0;
+volatile sig_atomic_t shutdown_req = 0;
 
 void sigterm_handler(int sig)
 {
@@ -10,7 +10,7 @@ void sigterm_handler(int sig)
     const char msg[] = "SIGTERM received\n";
     write(STDERR_FILENO, msg, sizeof(msg) - 1);
 
-    sigterm = 1;
+    shutdown_req = 1;
 
     (void)sig;
 }

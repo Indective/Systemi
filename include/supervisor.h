@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void update(supervisor *sup, process *p);
+void update(supervisor *sup, process *p, process_result *res);
 
 void init(void);
-

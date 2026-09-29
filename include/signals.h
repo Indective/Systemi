@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <string.h>
 
-extern volatile sig_atomic_t sigterm;
+extern volatile sig_atomic_t shutdown_req;
 
 void sigterm_handler(int sig);
 

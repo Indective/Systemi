@@ -83,8 +83,10 @@ process_result process_wait(process *p)
     {
         if (errno == EINTR) 
         {
-            sigterm = 0;
             printf("got sigterm !\n");
+
+            process_stop(p);
+            return process_wait(p);
         } 
         else 
         {

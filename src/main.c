@@ -7,8 +7,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-// build a sigterm handler
-
 int main(int argc, char* argv[])
 {
     // init
@@ -21,7 +19,7 @@ int main(int argc, char* argv[])
     process_result res;
 
     p.argv = argv;
-    p.restart = RES_NEVER;
+    p.restart = RES_ALWAYS;
 
     sup.should_stop = false;
 
@@ -32,7 +30,7 @@ int main(int argc, char* argv[])
         
         //process_stop(&p);
 
-        update(&sup, &p);
+        update(&sup, &p, &res);
     }
     
     return 0;

@@ -4,7 +4,7 @@
 #include <signal.h>
 #include <errno.h>
 
-pid_t process_start(process *p)
+void process_start(process* p)
 {
     fflush(stdout);
 
@@ -28,73 +28,106 @@ pid_t process_start(process *p)
     else // parent code 
     {
         printf("started program with pid : %d\n", pid);
+        p->pid = pid;
     }
 
-    return pid;
+
 }
 
-process_result supervisor_handle_status(int status, process *p)
+void supervisor_handle_status(int status, process *p)
 {
-    process_result result;
-
     if (WIFEXITED(status)) 
     {
-        int exit_status = WEXITSTATUS(status);
-        printf("\nChild exited normally with status: %d\n", exit_status);
-        p->exit_code = exit_status;
-        result.exit_status = exit_status;
-    }
-    
-    else 
+        printf("Child exited normally with status: %d\n", WEXITSTATUS(status));
+        p->exit_code = WEXITSTATUS(status);
+    } 
+    else if (WIFSIGNALED(status)) {
+
+        printf("Child terminated by signal: %d\n", WTERMSIG(status));
+        p->term_signal = WTERMSIG(status);
+
+        if (WCOREDUMP(status)) 
+        {
+            printf("Core dumped.\n");
+            p->core_dumped = true;
+        }
+    } 
+    else if (WIFSTOPPED(status)) 
     {
-        if (WIFSIGNALED(status)) 
-        {
-            int term_signal = WTERMSIG(status);
-            printf("Child was killed by signal: %d\n", term_signal);
-            result.term_signal = term_signal;
-            result.process_signaled = true;
-
-            /*if (WCOREDUMP(status)) 
-            {
-                printf("Child produced a core dump.\n");
-                p->core_dumped = true;
-            }
-            else
-            {
-                p->core_dumped = false;
-            }
-            */
-        }
-        else
-        {
-            result.term_signal = true;
-            result.term_signal = -1;
-        }
+        printf("Child was stopped by signal: %d\n", WSTOPSIG(status));
+        p->stop_signal = WSTOPSIG(status);
+    } 
+    else if (WIFCONTINUED(status)) 
+    {
+        printf("Child was continued.\n");
     }
-
-    return result;
 }
 
-process_result process_wait(process *p)
+process* find_process(process *Processes[], pid_t pid)
+{
+    int count = (sizeof(Processes) / sizeof(Processes[0]));
+    for(int i = 0; i < count; i++)
+    {
+        if(Processes[i]->pid == pid)
+        {
+            return Processes[i];
+        }
+    }
+}
+
+void handle_restart(process *p)
+{
+    if(p->restart == RES_ALWAYS)
+    {
+        process_start(p);
+    }
+    else if(p->restart == RES_ON_SUCCESS)
+    {
+        if(p->exit_code == 0)
+        {
+            process_start(p);
+        }
+    }
+    else if(p->restart == RES_ON_FAILURE)
+    {
+        if(p->exit_code != 0)
+        {
+            process_start(p);
+        }
+    }
+}
+
+void process_wait(process* Processes[])
 {
     int status;
+    pid_t pid;
 
-    if(waitpid(p->pid, &status , 0) == -1)
+    while(1)
     {
-        if (errno == EINTR) 
+        pid = waitpid(-1, &status, 0);
+
+        if(errno == ECHILD) // no children left
+        {
+            break;
+        }
+
+        process* p = find_process(Processes ,pid);
+    
+        if (errno == EINTR)
         {
             printf("got sigterm !\n");
 
             process_stop(p);
-            return process_wait(p);
-        } 
+        }
         else 
         {
             perror("waitpid");
         }
-    }
-    
-    return supervisor_handle_status(status, p);
+
+        supervisor_handle_status(status, p);
+
+        handle_restart(p);
+    }   
 }
 
 int process_stop(process *p)

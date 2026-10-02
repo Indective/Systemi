@@ -9,30 +9,20 @@
 
 int main(int argc, char* argv[])
 {
-    // init
-    init();
+    process Processes[MAX_PROCESSES];
+    int count = (sizeof(Processes) / sizeof(Processes[0]));
+
+    init(argv, Processes);
 
     printf("argc  : %d\n", argc); // satisfy compiler error
 
-    process p;
-    supervisor sup;
-    process_result res;
-
-    p.argv = argv;
-    p.restart = RES_ALWAYS;
-
-    sup.should_stop = false;
-
-    while(!sup.should_stop)
+    for(int i = 0; i < count; i++)
     {
-        p.pid = process_start(&p);
-        res = process_wait(&p);
-        
-        //process_stop(&p);
-
-        update(&sup, &p, &res);
+        process_start(&Processes[i]);
     }
-    
+
+    process_wait(Processes);
+
     return 0;
 }
 

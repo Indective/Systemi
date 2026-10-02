@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-void update(supervisor *sup, process *p, process_result *res);
+bool should_stop();
 
-void init(void);
+void init(char* argv[], process *p);

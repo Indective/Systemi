@@ -8,11 +8,11 @@
 #include <signal.h>
 #include <sys/wait.h>
 
-typedef struct
-{
-    bool should_stop;
+// constants
 
-} supervisor;  
+#define MAX_PROCESSES 50
+
+// typedef / struct
 
 typedef enum
 {
@@ -25,21 +25,17 @@ typedef enum
 
 typedef struct
 {
-    int exit_status;
-    bool process_signaled;
-    int term_signal;
-
-} process_result;
-
-
-typedef struct
-{
     char** argv;
     pid_t pid;
 
     int exit_code;
+
     bool core_dumped;
+
     int term_signal;
+
+    int stop_signal;
+
     restart_policy restart;
 
 } process;

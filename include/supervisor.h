@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-bool should_stop();
+bool should_stop(void);
 
-void init(char* argv[], process *p);
+int sup_init(char* argv[], process *p);

@@ -5,7 +5,7 @@
 
 #include <errno.h>
 
-bool should_stop()
+bool should_stop(void)
 {
     // terminate or not
     if (shutdown_req) 
@@ -16,18 +16,28 @@ bool should_stop()
     return false;
 }
 
-void init(char *argv[], process *p)
+int sup_init(char* argv[], process *p)
 {
+    int p_size = 0;
+
     printf("%d \n", getpid());
 
     install_sigterm();
 
-    int p_count = (sizeof(argv) / sizeof(argv[0])) - 1;
-    for(int i = 0; i < p_count; i++)
+    while (argv[p_size] != NULL) 
     {
-        p[i].argv = argv[i+1];
+        p_size++;
+    }
+
+    p_size --; // minus one for the arg[0] (calling the program)
+
+    for(int i = 0; i < p_size; i++)
+    {
+        p[i].argv = &argv[i+1];
         p[i].restart = RES_NEVER;
     }
+
+    return p_size;
 
 }
 

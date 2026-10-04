@@ -10,18 +10,17 @@
 int main(int argc, char* argv[])
 {
     process Processes[MAX_PROCESSES];
-    int count = (sizeof(Processes) / sizeof(Processes[0]));
 
-    init(argv, Processes);
+    int p_size = sup_init(argv, Processes);
 
     printf("argc  : %d\n", argc); // satisfy compiler error
 
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < p_size; i++)
     {
         process_start(&Processes[i]);
     }
 
-    process_wait(Processes);
+    process_wait(Processes, p_size);
 
     return 0;
 }

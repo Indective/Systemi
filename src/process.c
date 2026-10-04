@@ -1,8 +1,11 @@
+#define _GNU_SOURCE
+
 #include "process.h"
 #include "signals.h"
 
 #include <signal.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 void process_start(process* p)
 {
@@ -13,8 +16,6 @@ void process_start(process* p)
     if(pid == -1)
     {
         printf("fork failed \n");
-
-        return -1;
     }
     else if(pid == 0) // child code
     {
@@ -63,16 +64,17 @@ void supervisor_handle_status(int status, process *p)
     }
 }
 
-process* find_process(process *Processes[], pid_t pid)
+process* find_process(process *Processes, pid_t pid, int p_size)
 {
-    int count = (sizeof(Processes) / sizeof(Processes[0]));
-    for(int i = 0; i < count; i++)
+    for(int i = 0; i < p_size; i++)
     {
-        if(Processes[i]->pid == pid)
+        if(Processes[i].pid == pid)
         {
-            return Processes[i];
+            return &Processes[i];
         }
     }
+
+    return NULL;
 }
 
 void handle_restart(process *p)
@@ -97,7 +99,7 @@ void handle_restart(process *p)
     }
 }
 
-void process_wait(process* Processes[])
+void process_wait(process* Processes, int p_size)
 {
     int status;
     pid_t pid;
@@ -111,7 +113,7 @@ void process_wait(process* Processes[])
             break;
         }
 
-        process* p = find_process(Processes ,pid);
+        process* p = find_process(Processes ,pid, p_size);
     
         if (errno == EINTR)
         {

@@ -33,7 +33,7 @@ int sup_init(char* argv[], process *p)
 
     for(int i = 0; i < p_size; i++)
     {
-        p[i].argv = &argv[i+1];
+        p[i].argv = &argv[i+1]; // temporary for children with no arguments (only calling the child )
         p[i].restart = RES_NEVER;
     }
 

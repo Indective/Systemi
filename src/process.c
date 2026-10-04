@@ -21,7 +21,7 @@ void process_start(process* p)
     {
         restore_signal_handling();
         
-        execvp(p->argv[1], &p->argv[1]);
+        execvp(p->argv[0], &p->argv[0]);
 
         perror("execvp");
         _exit(1);
@@ -39,12 +39,12 @@ void supervisor_handle_status(int status, process *p)
 {
     if (WIFEXITED(status)) 
     {
-        printf("Child exited normally with status: %d\n", WEXITSTATUS(status));
+        printf("%d exited normally with status: %d\n", p->pid,WEXITSTATUS(status));
         p->exit_code = WEXITSTATUS(status);
     } 
-    else if (WIFSIGNALED(status)) {
-
-        printf("Child terminated by signal: %d\n", WTERMSIG(status));
+    else if (WIFSIGNALED(status)) 
+    {
+        printf("%d terminated by signal: %d\n", p->pid,WTERMSIG(status));
         p->term_signal = WTERMSIG(status);
 
         if (WCOREDUMP(status)) 
@@ -55,7 +55,7 @@ void supervisor_handle_status(int status, process *p)
     } 
     else if (WIFSTOPPED(status)) 
     {
-        printf("Child was stopped by signal: %d\n", WSTOPSIG(status));
+        printf("%d was stopped by signal: %d\n", p->pid,WSTOPSIG(status));
         p->stop_signal = WSTOPSIG(status);
     } 
     else if (WIFCONTINUED(status)) 
@@ -108,27 +108,38 @@ void process_wait(process* Processes, int p_size)
     {
         pid = waitpid(-1, &status, 0);
 
-        if(errno == ECHILD) // no children left
+        if(pid > 0) // child 
         {
+            printf("got child\n");
+            process* p = find_process(Processes ,pid, p_size);
+
+            supervisor_handle_status(status, p);
+
+            handle_restart(p);
+        }
+        else if(pid == -1)
+        {
+            printf("got -1\n");
+
+            if(errno == ECHILD) // no children left
+            {
+                printf("no children left\n");
+
+                break;
+            }
+
+            else if (errno == EINTR)
+            {
+                printf("wait interrupted\n");
+
+                // deal with sigterm
+            }
+
+            perror("waitpid");
+
             break;
         }
 
-        process* p = find_process(Processes ,pid, p_size);
-    
-        if (errno == EINTR)
-        {
-            printf("got sigterm !\n");
-
-            process_stop(p);
-        }
-        else 
-        {
-            perror("waitpid");
-        }
-
-        supervisor_handle_status(status, p);
-
-        handle_restart(p);
     }   
 }
 

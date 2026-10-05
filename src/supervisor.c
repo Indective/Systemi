@@ -13,6 +13,7 @@ bool should_stop(void)
         shutdown_req = 0;
         return true;
     }
+    
     return false;
 }
 

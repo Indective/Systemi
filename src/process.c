@@ -2,6 +2,7 @@
 
 #include "process.h"
 #include "signals.h"
+#include "supervisor.h"
 
 #include <signal.h>
 #include <errno.h>
@@ -99,6 +100,14 @@ void handle_restart(process *p)
     }
 }
 
+void kill_all_children(process *Processes, int p_size)
+{
+    for(int i = 0; i < p_size; i++)
+    {
+        process_stop(&Processes[i]);
+    }   
+}
+
 void process_wait(process* Processes, int p_size)
 {
     int status;
@@ -111,6 +120,7 @@ void process_wait(process* Processes, int p_size)
         if(pid > 0) // child 
         {
             printf("got child\n");
+
             process* p = find_process(Processes ,pid, p_size);
 
             supervisor_handle_status(status, p);
@@ -119,8 +129,6 @@ void process_wait(process* Processes, int p_size)
         }
         else if(pid == -1)
         {
-            printf("got -1\n");
-
             if(errno == ECHILD) // no children left
             {
                 printf("no children left\n");
@@ -130,9 +138,17 @@ void process_wait(process* Processes, int p_size)
 
             else if (errno == EINTR)
             {
-                printf("wait interrupted\n");
+                printf("waitpid interrupted\n");
+                
+                // gracefully shutdown all processes 1
+                if(should_stop())
+                {
+                    kill_all_children(Processes, p_size);
 
-                // deal with sigterm
+                    waitpid(-1, NULL, 0); // reap children so they dont become zombie processes
+                }
+
+                break;
             }
 
             perror("waitpid");
@@ -143,8 +159,9 @@ void process_wait(process* Processes, int p_size)
     }   
 }
 
-int process_stop(process *p)
+void process_stop(process *p)
 {
-    printf("killing process\n");
-    return kill(p->pid, SIGTERM);
+    printf("killing pid : %d\n", p->pid);
+    
+    kill(p->pid, SIGTERM);
 }

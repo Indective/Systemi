@@ -8,7 +8,7 @@
 #include <sys/wait.h>
 
 // 1. Implement restart policies properly
-// 2. rename policies enum
+// 2. rename policies enum   done 
 // 3. Add restart limits and backoff
 // 5. Add configuration
 

@@ -35,8 +35,8 @@ int sup_init(char* argv[], process *p)
     for(int i = 0; i < p_size; i++)
     {
         p[i].argv = &argv[i+1]; // temporary for children with no arguments (only calling the child )
-        p[i].restart.count = 0;
-        p[i].restart.policy = RES_NEVER;
+        p[i].restart.count = 1;
+        p[i].restart.policy = RES_ON_FAILURE;
         p[i].restart.pending = false;
 
     }

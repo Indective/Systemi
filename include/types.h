@@ -12,7 +12,7 @@
 // constants
 
 #define MAX_PROCESSES 50
-#define MAX_RESTART 100
+#define MAX_RESTART 2
 
 // typedef / struct
 

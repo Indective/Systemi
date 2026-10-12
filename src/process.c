@@ -47,6 +47,7 @@ void supervisor_handle_status(int status, process *p)
     {
         printf("%d terminated by signal: %d\n", p->pid,WTERMSIG(status));
         p->term_signal = WTERMSIG(status);
+        p->exit_code = 128 + p->term_signal;
 
         if (WCOREDUMP(status)) 
         {
@@ -58,10 +59,12 @@ void supervisor_handle_status(int status, process *p)
     {
         printf("%d was stopped by signal: %d\n", p->pid,WSTOPSIG(status));
         p->stop_signal = WSTOPSIG(status);
+        p->exit_code = 128 + p->stop_signal;
+
     } 
     else if (WIFCONTINUED(status)) 
     {
-        printf("Child was continued.\n");
+        printf("Child resumed execution.\n");
     }
 }
 
@@ -80,6 +83,8 @@ process* find_process(process *Processes, pid_t pid, int p_size)
 
 void handle_restart(process *p)
 {
+    printf("exit code : %d\n", p->exit_code);
+
     if(p->restart.policy == RES_ALWAYS)
     {
         process_start(p);
@@ -102,7 +107,7 @@ void handle_restart(process *p)
             }
             else 
             {
-                printf("pid : %d exceeded restart limit", p->pid);
+                printf("pid : %d exceeded restart limit\n", p->pid);
             }
         }
     }

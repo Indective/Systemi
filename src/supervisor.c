@@ -19,11 +19,11 @@ bool should_stop(void)
 
 int sup_init(char* argv[], process *p)
 {
-    int p_size = 0;
-
     printf("%d \n", getpid());
 
     install_sigterm();
+
+    int p_size = 0;
 
     while (argv[p_size] != NULL) 
     {
@@ -35,7 +35,10 @@ int sup_init(char* argv[], process *p)
     for(int i = 0; i < p_size; i++)
     {
         p[i].argv = &argv[i+1]; // temporary for children with no arguments (only calling the child )
-        p[i].restart = RES_NEVER;
+        p[i].restart.count = 0;
+        p[i].restart.policy = RES_NEVER;
+        p[i].restart.pending = false;
+
     }
 
     return p_size;

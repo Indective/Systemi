@@ -80,22 +80,30 @@ process* find_process(process *Processes, pid_t pid, int p_size)
 
 void handle_restart(process *p)
 {
-    if(p->restart == RES_ALWAYS)
+    if(p->restart.policy == RES_ALWAYS)
     {
         process_start(p);
     }
-    else if(p->restart == RES_ON_SUCCESS)
+    else if(p->restart.policy == RES_ON_SUCCESS)
     {
         if(p->exit_code == 0)
         {
             process_start(p);
         }
     }
-    else if(p->restart == RES_ON_FAILURE)
+    else if(p->restart.policy == RES_ON_FAILURE)
     {
         if(p->exit_code != 0)
         {
-            process_start(p);
+            if(p->restart.count < MAX_RESTART)
+            {    
+                p->restart.count++;
+                process_start(p);
+            }
+            else 
+            {
+                printf("pid : %d exceeded restart limit", p->pid);
+            }
         }
     }
 }
@@ -140,7 +148,7 @@ void process_wait(process* Processes, int p_size)
             {
                 printf("waitpid interrupted\n");
                 
-                // gracefully shutdown all processes 1
+                // gracefully shutdown all processes
                 if(should_stop())
                 {
                     kill_all_children(Processes, p_size);

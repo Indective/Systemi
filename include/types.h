@@ -7,10 +7,12 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
+#include <time.h>
 
 // constants
 
 #define MAX_PROCESSES 50
+#define MAX_RESTART 100
 
 // typedef / struct
 
@@ -25,6 +27,15 @@ typedef enum
 
 typedef struct
 {
+    restart_policy policy;
+    int count;
+    bool pending;
+    time_t time;
+
+} restart_handle;
+
+typedef struct
+{
     char** argv;
     pid_t pid;
 
@@ -36,6 +47,5 @@ typedef struct
 
     int stop_signal;
 
-    restart_policy restart;
-
+    restart_handle restart;
 } process;

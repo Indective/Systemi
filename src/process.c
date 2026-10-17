@@ -41,25 +41,25 @@ void supervisor_handle_status(int status, process *p)
     if (WIFEXITED(status)) 
     {
         printf("%d exited normally with status: %d\n", p->pid,WEXITSTATUS(status));
-        p->exit_code = WEXITSTATUS(status);
+        p->status.exit_code = WEXITSTATUS(status);
     } 
     else if (WIFSIGNALED(status)) 
     {
         printf("%d terminated by signal: %d\n", p->pid,WTERMSIG(status));
-        p->term_signal = WTERMSIG(status);
-        p->exit_code = 128 + p->term_signal;
+        p->status.term_signal = WTERMSIG(status);
+        p->status.exit_code = 128 + p->status.term_signal;
 
         if (WCOREDUMP(status)) 
         {
             printf("Core dumped.\n");
-            p->core_dumped = true;
+            p->status.core_dumped = true;
         }
     } 
     else if (WIFSTOPPED(status)) 
     {
         printf("%d was stopped by signal: %d\n", p->pid,WSTOPSIG(status));
-        p->stop_signal = WSTOPSIG(status);
-        p->exit_code = 128 + p->stop_signal;
+        p->status.stop_signal = WSTOPSIG(status);
+        p->status.exit_code = 128 + p->status.stop_signal;
 
     } 
     else if (WIFCONTINUED(status)) 
@@ -83,7 +83,7 @@ process* find_process(process *Processes, pid_t pid, int p_size)
 
 void handle_restart(process *p)
 {
-    printf("exit code : %d\n", p->exit_code);
+    printf("exit code : %d\n", p->status.exit_code);
 
     if(p->restart.policy == RES_ALWAYS)
     {
@@ -91,23 +91,23 @@ void handle_restart(process *p)
     }
     else if(p->restart.policy == RES_ON_SUCCESS)
     {
-        if(p->exit_code == 0)
+        if(p->status.exit_code == 0)
         {
             process_start(p);
         }
     }
     else if(p->restart.policy == RES_ON_FAILURE)
     {
-        if(p->exit_code != 0)
+        if(p->status.exit_code != 0)
         {
-            if(p->restart.count < MAX_RESTART)
+            if(p->restart.count < p->max_restart)
             {    
                 p->restart.count++;
                 process_start(p);
             }
             else 
             {
-                printf("pid : %d exceeded restart limit\n", p->pid);
+                printf("%d exceeded restart limit\n", p->pid);
             }
         }
     }

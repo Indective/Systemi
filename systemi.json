@@ -1,0 +1,10 @@
+{
+  "processes": [
+    {
+      "name": "worker",
+      "argv": ["./tests/sleep"],
+      "restart": "always",
+      "max_restarts": 2
+    }
+  ]
+}

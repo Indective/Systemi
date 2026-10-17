@@ -12,9 +12,6 @@
 // constants
 
 #define MAX_PROCESSES 50
-#define MAX_RESTART 2
-
-// typedef / struct
 
 typedef enum
 {
@@ -36,9 +33,6 @@ typedef struct
 
 typedef struct
 {
-    char** argv;
-    pid_t pid;
-
     int exit_code;
 
     bool core_dumped;
@@ -46,6 +40,20 @@ typedef struct
     int term_signal;
 
     int stop_signal;
+
+} status;
+
+typedef struct
+{
+    char *name;
+
+    char** argv;
+
+    pid_t pid;
+
+    int max_restart;
+
+    status status;
 
     restart_handle restart;
 } process;

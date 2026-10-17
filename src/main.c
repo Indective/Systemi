@@ -1,3 +1,5 @@
+#include <cJSON.h>
+
 #include "signals.h"
 #include "process.h"
 #include "types.h"
@@ -12,9 +14,14 @@
 // 3. Add restart limits and backoff
 // 5. Add configuration
 
+
+
+// handle supervisor exit cleanup 
+
+
 int main(int argc, char* argv[])
 {
-    process Processes[MAX_PROCESSES];
+    process Processes[MAX_PROCESSES] = {0};
 
     int p_size = sup_init(argv, Processes);
 
@@ -26,6 +33,8 @@ int main(int argc, char* argv[])
     }
 
     process_wait(Processes, p_size);
+
+    exit_cleanup(Processes, p_size);
 
     return 0;
 }

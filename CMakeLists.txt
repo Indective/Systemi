@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.9)
 
 project(systemi VERSION 0.1.0 LANGUAGES C)
 
@@ -23,6 +23,12 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
 
 add_executable(systemi ${SOURCES})
+
+target_include_directories(systemi PRIVATE
+    ${cjson_SOURCE_DIR}
+)
+
+target_link_libraries(systemi PRIVATE cjson)
 
 target_include_directories(systemi
     PRIVATE

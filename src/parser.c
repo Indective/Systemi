@@ -31,7 +31,7 @@ char* read_file_to_string(const char *filename)
 
     if(feof(file))
     {
-        buffer[read_bytes] = NULL;
+        buffer[read_bytes] = '\0';
         
         fclose(file);
         return buffer;

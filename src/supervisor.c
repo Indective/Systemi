@@ -64,7 +64,7 @@ bool create_processes(const cJSON *json_data, process *p, size_t *count)
 
             // add process max restarts
             cJSON *max_restart = cJSON_GetObjectItemCaseSensitive(json_process, "max_restarts");
-            if (cJSON_IsNumber(max_restart) && max_restart->valueint > 0) 
+            if (cJSON_IsNumber(max_restart) && max_restart->valueint >= 0) 
             {
                 p[*count].max_restart = max_restart->valueint;
             }
@@ -128,12 +128,47 @@ bool create_processes(const cJSON *json_data, process *p, size_t *count)
 
                     j++;
                 }
+
+
             }
             else
             {
                 printf("Error : A process must have and argv, check json config");
                 return false;
             }
+
+            // add process restart policy
+            cJSON *restart_policy = cJSON_GetObjectItemCaseSensitive(json_process, "restart");
+            if(cJSON_IsString(restart_policy) && (strcmp(restart_policy->valuestring,"") != 0))
+            {
+                if(strcmp(restart_policy->valuestring, "always") == 0)
+                {
+                    p[*count].max_restart = RES_ALWAYS;
+                }
+                else if(strcmp(restart_policy->valuestring,"never") == 0)
+                {
+                    p[*count].max_restart = RES_NEVER;
+                }
+                else if(strcmp(restart_policy->valuestring,"on failure") == 0)
+                {
+                    p[*count].max_restart = RES_ON_FAILURE;
+                }
+                else if(strcmp(restart_policy->valuestring,"on success") == 0)
+                {
+                    p[*count].max_restart = RES_ON_SUCCESS;
+                }
+                else
+                {
+                    printf("Error : restart policy type unidentifed , policy types are (case sensitve) : \nalways\nnever\non failure\non success\n");
+                    return false;
+                } 
+            }
+            else
+            {
+                printf("Error : restart policy must be of type string, and not empty\n");
+                return false;
+            }
+
 
             (*count)++;
         }
